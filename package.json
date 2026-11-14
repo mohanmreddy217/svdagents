@@ -1,1 +1,1 @@
-{ "name": "sv-developers-portal", "private": true }
+{ "name": "sv-developers-portal", "private": true, "engines": { "node": "20.x" } }

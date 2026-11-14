@@ -221,7 +221,7 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
 <dialog id="dlg"></dialog><dialog id="dup" class="dup"></dialog>
 <script>
 const RANKS=[{"n":"Marketing Chief","c":"MCH","h":"Not listed","f":"Not listed"},{"n":"Marketing President","c":"OMP","h":"2900/- + 100/- transport","f":"30% + 50/- transport"},{"n":"Marketing Vice President","c":"MVP","h":"2650/-","f":"27%"},{"n":"Marketing Senior Director","c":"MSD","h":"2400/-","f":"24%"},{"n":"Marketing Director","c":"OMD","h":"2200/-","f":"22%"},{"n":"Deputy Marketing Director","c":"DMD","h":"2000/-","f":"20%"},{"n":"Assistant Marketing Director","c":"AMD","h":"Not listed","f":"Not listed"},{"n":"Chief General Manager","c":"CGM","h":"1800/-","f":"18%"},{"n":"General Manager","c":"OGM","h":"1600/-","f":"16%"},{"n":"Deputy General Manager","c":"DGM","h":"1400/-","f":"14%"},{"n":"Assistant General Manager","c":"AGM","h":"1200/-","f":"12%"},{"n":"Marketing Manager","c":"OMM","h":"1000/-","f":"10%"},{"n":"Marketing Executive","c":"OME","h":"Not set","f":"Not set"},{"n":"Coupens Tele","c":"CTL","h":"Not set","f":"Not set"},{"n":"Others","c":"OTH","h":"Not set","f":"Not set"}];
-const OTH=14;const rn=m=>esc(m.r===OTH&&m.dn?m.dn:rn(m));
+const OTH=14;const rn=m=>esc(m.r===OTH&&m.dn?m.dn:RANKS[m.r].n);
 const LABEL={admin:'Admin',editor:'Editor',viewer:'Viewer'};let TOKEN='';
 const $=id=>document.getElementById(id);
 const fmt=d=>{if(!d)return'-';const[y,m,x]=d.split('-');return x+'-'+m+'-'+y};
@@ -370,14 +370,15 @@ function dupCheck(n,a){
 function openForm(n){
  if(!can('add'))return;
  const nw=!n,m=nw?{n:nextNum(),name:'',r:12,ph:'',d:new Date().toISOString().slice(0,10),s:'ACTIVE',team:teamF==='ALL'?'SV DEVELOPERS':teamF,lead:false,aad:''}:merged()[n];
- const teams=[...new Set(recs().map(x=>x.team))];
+ const teams=[...new Set([...recs().map(x=>x.team),m.team])].sort();
  $('dlg').innerHTML=`<h3 class="sora" style="font-size:20px">${nw?'Add member':'Edit member'}</h3><div class="hint" style="margin:2px 0 0">ID <b class="mono" id="pid"></b></div>
  <div class="fg"><div class="w"><label for="f1">Full name</label><input id="f1" type="text" value="${esc(m.name)}"></div>
  <div class="w"><label for="f2">Aadhaar number (unique)</label><input id="f2" type="text" inputmode="numeric" maxlength="14" value="${fa(m.aad)}" placeholder="0000 0000 0000"><div class="fe" id="e2"></div></div>
  <div><label for="f3">Phone</label><input id="f3" type="text" inputmode="numeric" maxlength="10" value="${esc(m.ph)}"></div>
  <div><label for="f4">Rank</label><select id="f4">${RANKS.map((r,i)=>`<option value="${i}" ${i===m.r?'selected':''}>${r.n} (${r.c})</option>`).join('')}</select></div>
  <div class="w ${m.r===OTH?'':'hide'}" id="odw"><label for="f14">Specify designation</label><input id="f14" type="text" value="${esc(m.dn||'')}" placeholder="e.g. Accountant"></div>
- <div><label for="f5">Team</label><input id="f5" list="tl" type="text" value="${esc(m.team)}"><datalist id="tl">${teams.map(t=>`<option value="${esc(t)}">`).join('')}</datalist></div>
+ <div class="w"><label for="f5">Team</label><select id="f5">${teams.map(t=>`<option value="${esc(t)}" ${t===m.team?'selected':''}>${esc(t)}</option>`).join('')}<option value="__new">+ New team...</option></select>
+ <input id="f5n" class="hide" type="text" placeholder="New team name" style="margin-top:6px"><div class="hint" id="tm" style="margin:6px 0 0"></div></div>
  <div><label for="f6">Date of joining</label><input id="f6" type="date" value="${m.d}"></div>
  <div><label for="f10">PAN number</label><input id="f10" type="text" maxlength="10" value="${esc(m.pan||'')}" placeholder="ABCDE1234F"></div><div><label for="f11">Father / spouse name</label><input id="f11" type="text" value="${esc(m.fs||'')}"></div>
  <div><label for="f12">Sponsor</label><input id="f12" type="text" value="${esc(m.sp||'')}"></div><div class="w"><label for="f13">Address</label><input id="f13" type="text" value="${esc(m.ad||'')}"></div>
@@ -385,18 +386,19 @@ function openForm(n){
  <div class="w"><label for="f7">Status</label><select id="f7"><option value="ACTIVE" ${m.s!=='INACTIVE'?'selected':''}>Active</option><option value="INACTIVE" ${m.s==='INACTIVE'?'selected':''}>Inactive</option></select></div></div>
  <div class="fe" id="fe"></div><div class="row2"><button class="btn" id="sv">Save</button><button class="btn ghost" id="cn">Cancel</button></div>`;
  const pid=()=>$('pid').textContent=idOf({n:m.n,r:+$('f4').value});pid();$('f4').onchange=()=>{pid();$('odw').classList.toggle('hide',+$('f4').value!==OTH)};
+ const showTm=()=>{const t=$('f5').value;if(t==='__new'){$('f5n').classList.remove('hide');$('tm').textContent='Type the new team name above.';return}$('f5n').classList.add('hide');const L=recs().filter(x=>x.team===t&&x.n!==m.n);$('tm').innerHTML=L.length?'<b>Current members ('+L.length+'):</b> '+L.map(x=>esc(x.name)+(x.lead?' (leader)':'')).join(', '):'No members in this team yet.'};$('f5').onchange=showTm;showTm();
  $('f2').oninput=()=>{const v=dig($('f2').value).slice(0,12);$('f2').value=fa(v);$('e2').textContent=''};
  $('f2').onchange=()=>{const v=dig($('f2').value);if(v.length===12&&/^[2-9]/.test(v))dupCheck(m.n,v)};
  $('cn').onclick=()=>$('dlg').close();
  $('sv').onclick=async()=>{
   const name=$('f1').value.trim().toUpperCase(),a=dig($('f2').value),ph=dig($('f3').value),fe=$('fe');
   if(!name){fe.textContent='Enter the full name.';return}
-  if(a.length!==12||!/^[2-9]/.test(a)){$('e2').textContent='Aadhaar must be 12 digits and cannot start with 0 or 1.';return}
+  if(a.length!==12||!/^[2-9]/.test(a)){$('e2').textContent=fe.textContent='Aadhaar must be 12 digits and cannot start with 0 or 1.';fe.scrollIntoView({block:'nearest'});return}
   if(ph&&ph.length!==10){fe.textContent='Phone must be 10 digits.';return}
   const pan=$('f10').value.replace(/\s/g,'').toUpperCase();if(pan&&!/^[A-Z]{5}\d{4}[A-Z]$/.test(pan)){fe.textContent='PAN must look like ABCDE1234F.';return}
   if(+$('f4').value===OTH&&!$('f14').value.trim()){fe.textContent='Type the designation for Others.';return}
   if(dupCheck(m.n,a))return;
-  const team=$('f5').value.trim().toUpperCase()||'SV DEVELOPERS';
+  const tsel=$('f5').value,team=(tsel==='__new'?$('f5n').value:tsel).trim().toUpperCase();if(!team){fe.textContent='Enter the new team name.';return}
   const rec={...m,name,aad:a,ph,r:+$('f4').value,dn:+$('f4').value===OTH?$('f14').value.trim():'',team,d:$('f6').value,s:$('f7').value,tv:Math.max(0,+$('f8').value||0),tb:Math.max(0,+$('f9').value||0),pan,fs:$('f11').value.trim().toUpperCase(),sp:$('f12').value.trim().toUpperCase(),ad:$('f13').value.trim().toUpperCase()};
   if(await save(rec))$('dlg').close();else fe.textContent='Could not save to the shared database. Try again.';
  };

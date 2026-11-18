@@ -204,7 +204,7 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
   <header class="top"><div class="brand logo sm"><img id="hlogo" alt="SV Developers"></div>
     <div class="who"><span class="badge" id="rl"></span><button class="btn sm" id="out">Log out</button></div></header>
   <main>
-    <div class="banner hide" id="bn">The shared database is not connected, so edits stay on this page only until you close it.</div>
+    <div class="banner hide" id="bn">Saving is not set up yet, so changes stay on this page only until you refresh. Connect the database in Vercel to keep them.</div>
     <div class="stats" id="stats"></div>
     <div class="grid">
       <aside class="card"><h3 style="font-size:16px">Teams</h3><div class="ladder" id="teams"></div></aside>
@@ -222,7 +222,7 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
 <script>
 const RANKS=[{"n":"Marketing Chief","c":"MCH","h":"Not listed","f":"Not listed"},{"n":"Marketing President","c":"OMP","h":"2900/- + 100/- transport","f":"30% + 50/- transport"},{"n":"Marketing Vice President","c":"MVP","h":"2650/-","f":"27%"},{"n":"Marketing Senior Director","c":"MSD","h":"2400/-","f":"24%"},{"n":"Marketing Director","c":"OMD","h":"2200/-","f":"22%"},{"n":"Deputy Marketing Director","c":"DMD","h":"2000/-","f":"20%"},{"n":"Assistant Marketing Director","c":"AMD","h":"Not listed","f":"Not listed"},{"n":"Chief General Manager","c":"CGM","h":"1800/-","f":"18%"},{"n":"General Manager","c":"OGM","h":"1600/-","f":"16%"},{"n":"Deputy General Manager","c":"DGM","h":"1400/-","f":"14%"},{"n":"Assistant General Manager","c":"AGM","h":"1200/-","f":"12%"},{"n":"Marketing Manager","c":"OMM","h":"1000/-","f":"10%"},{"n":"Marketing Executive","c":"OME","h":"Not set","f":"Not set"},{"n":"Coupens Tele","c":"CTL","h":"Not set","f":"Not set"},{"n":"Others","c":"OTH","h":"Not set","f":"Not set"}];
 const OTH=14;const rn=m=>esc(m.r===OTH&&m.dn?m.dn:RANKS[m.r].n);
-const LABEL={admin:'Admin',editor:'Editor',viewer:'Viewer'};let TOKEN='';
+const LABEL={admin:'Admin',editor:'Editor',viewer:'Viewer'};let TOKEN='',PERSIST=false,SAVEERR='';
 const $=id=>document.getElementById(id);
 const fmt=d=>{if(!d)return'-';const[y,m,x]=d.split('-');return x+'-'+m+'-'+y};
 const ini=s=>s.split(' ').map(x=>x[0]).slice(0,2).join('');
@@ -250,7 +250,7 @@ function render(){
  $('tt').textContent=teamF==='ALL'?'All members':teamF;
  $('ts').textContent=(teamF!=='ALL'&&T[teamF].l?'Leader: '+T[teamF].l+' · ':'')+L.length+' shown';
  $('add').classList.toggle('hide',!can('add'));
- $('bn').classList.toggle('hide',!(role!=='viewer'&&!dbx));
+ $('bn').classList.toggle('hide',!(role!=='viewer'&&!dbx&&!PERSIST));
  $('ren').classList.toggle('hide',!(can('add')&&teamF!=='ALL'));
  [['vl','list'],['vc','chart'],['vp','perf'],['vm','comm']].forEach(([b,v])=>$(b).classList.toggle('on',view===v));
  $('vm').classList.toggle('hide',vw);$('log').classList.toggle('hide',!can('add'));
@@ -298,7 +298,9 @@ function drawPerf(R,names){
  $('perf').querySelectorAll('.clk').forEach(r=>r.onclick=()=>{teamF=r.dataset.t;render()});
  $('perf').querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>{const a=ACT[b.dataset.ad];if(a&&role==='admin')saveAct({...a,del:true})});
 }
-async function saveAct(a){ACT[a.id]=a;if(dbx){try{await dbx.doc('acts/'+a.id).set(a)}catch(e){delete ACT[a.id];return false}}render();return true}
+async function saveAct(a){
+ if(PERSIST){try{const r=await api('/api/acts',{act:a});if(!r.ok){SAVEERR=r.j.message||'';return false}ACT[a.id]=r.j.act;render();return true}catch(e){return false}}
+ ACT[a.id]=a;if(dbx){try{await dbx.doc('acts/'+a.id).set(a)}catch(e){delete ACT[a.id];return false}}render();return true}
 function lab(box){box.querySelectorAll('table:not(.plain)').forEach(t=>{const H=[...t.querySelectorAll('thead th')].map(h=>h.textContent.trim());t.querySelectorAll('tbody tr').forEach(r=>{let i=0;[...r.children].forEach(c=>{c.dataset.label=H[i]||'';i+=c.colSpan||1})})})}
 function openTg(n){if(role!=='admin')return;const m=merged()[n];
  modal(`<h3 class="sora" style="font-size:20px">Targets · ${esc(m.name)}</h3><div class="hint" style="margin:2px 0 0">Monthly targets, applied to every month.</div><div class="fg"><div><label for="tg1">Site visits</label><input id="tg1" type="number" min="0" value="${m.tv||0}"></div><div><label for="tg2">Plot bookings</label><input id="tg2" type="number" min="0" value="${m.tb||0}"></div></div><div class="fe" id="tge"></div><div class="row2"><button class="btn" id="tgs">Save</button><button class="btn ghost" id="tgc">Cancel</button></div>`);
@@ -327,7 +329,7 @@ function openLog(ed){
   if(bk&&!(q>0)){fe.textContent='Enter the area in sq yd.';return}
   if(bk&&ty==='FARM'&&!(val>0)){fe.textContent='Enter the sale value for farm land.';return}
   const a={id:ed?ed.id:'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),t,m:$('a2').value,d:$('a3').value,c,ty:bk?ty:'',p:bk?$('a6').value.trim():'',q:bk?q:0,val:bk&&ty==='FARM'?val:0,del:false};
-  if(await saveAct(a)){$('mp').value=a.d.slice(0,7);$('dlg').close();render()}else fe.textContent='Could not save to the shared database. Try again.'};
+  if(await saveAct(a)){$('mp').value=a.d.slice(0,7);$('dlg').close();render()}else fe.textContent=SAVEERR||'Could not save to the shared database. Try again.'};
  $('dlg').showModal();
 }
 function drawChart(R,names,T){
@@ -400,11 +402,19 @@ function openForm(n){
   if(dupCheck(m.n,a))return;
   const tsel=$('f5').value,team=(tsel==='__new'?$('f5n').value:tsel).trim().toUpperCase();if(!team){fe.textContent='Enter the new team name.';return}
   const rec={...m,name,aad:a,ph,r:+$('f4').value,dn:+$('f4').value===OTH?$('f14').value.trim():'',team,d:$('f6').value,s:$('f7').value,tv:Math.max(0,+$('f8').value||0),tb:Math.max(0,+$('f9').value||0),pan,fs:$('f11').value.trim().toUpperCase(),sp:$('f12').value.trim().toUpperCase(),ad:$('f13').value.trim().toUpperCase()};
-  if(await save(rec))$('dlg').close();else fe.textContent='Could not save to the shared database. Try again.';
+  if(await save(rec,nw))$('dlg').close();else fe.textContent=SAVEERR||'Could not save to the shared database. Try again.';
  };
  $('dlg').showModal();
 }
-async function save(rec){
+async function api(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify(body)});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
+async function save(rec,isNew){
+ SAVEERR='';
+ if(PERSIST){
+  try{const r=await api('/api/people',{rec,isNew:!!isNew});
+   if(!r.ok){SAVEERR=r.j.message||'Could not save. Try again.';return false}
+   delete OV[rec.n];OV[r.j.rec.n]=r.j.rec;render();return true}
+  catch(e){SAVEERR='Could not save. Check your internet and try again.';return false}
+ }
  OV[rec.n]=rec;
  if(dbx){try{await dbx.doc('members/'+rec.n).set(rec)}catch(e){delete OV[rec.n];return false}}
  render();return true;
@@ -427,13 +437,15 @@ $('go').onclick=async()=>{const un=$('u').value.trim().toLowerCase(),btn=$('go')
   const pr=await fetch('/api/people',{headers:{Authorization:'Bearer '+TOKEN}});
   if(!pr.ok)throw 0;
   Object.keys(BASE).forEach(k=>delete BASE[k]);(await pr.json()).forEach(p=>BASE[p.n]=p);
+  PERSIST=pr.headers.get('x-persist')==='1';ACT={};
+  if(PERSIST){const ar=await fetch('/api/acts',{headers:{Authorization:'Bearer '+TOKEN}});if(ar.ok)(await ar.json()).forEach(a=>ACT[a.id]=a)}
  }catch(e){$('err').textContent='Could not sign in. Check your connection and try again.';btn.disabled=false;return}
  btn.disabled=false;$('pw').value='';
  $('login').classList.add('hide');$('app').classList.remove('hide');document.body.classList.add('in');window.scrollTo(0,0);
  $('rl').textContent=LABEL[role]+' access';teamF='ALL';view='list';$('q').value='';$('mp').value=new Date().toISOString().slice(0,7);render()};
 $('pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
 $('pwt').onclick=()=>{const h=$('pw').type==='password';$('pw').type=h?'text':'password';$('pwt').textContent=h?'Hide':'Show';$('pwt').setAttribute('aria-pressed',h);$('pwt').setAttribute('aria-label',h?'Hide password':'Show password')};
-$('out').onclick=()=>{role=null;TOKEN='';OV={};Object.keys(BASE).forEach(k=>delete BASE[k]);document.body.classList.remove('in');$('app').classList.add('hide');$('login').classList.remove('hide')};
+$('out').onclick=()=>{role=null;TOKEN='';OV={};ACT={};PERSIST=false;Object.keys(BASE).forEach(k=>delete BASE[k]);document.body.classList.remove('in');$('app').classList.add('hide');$('login').classList.remove('hide')};
 (async()=>{try{if(window.claude){dbx=await claude.use('db');
  if(dbx)dbx.collection('acts').onSnapshot(s=>{ACT={};s.docs.forEach(d=>ACT[d.id]=d.data());if(role)render()},()=>{});
  if(dbx)dbx.collection('members').onSnapshot(s=>{OV={};s.docs.forEach(d=>OV[d.id]=d.data());if(role)render()},()=>{});}}catch(e){dbx=null}

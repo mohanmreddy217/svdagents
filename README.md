@@ -54,3 +54,4 @@ If the yellow "Saving is not set up yet" bar still shows, the database is not co
 - "Client name" is now "Marketer name" (stored as `marketer`; older saved `client` values still show). Viewers can see the marketer name too.
 - Internal team section (between Team and Projects): COUPONS BD TEAM, COUPONS SALES TEAM, COUPONS TELE TEAM and INTERNAL TEAM. The old SV DEVELOPERS team is merged into INTERNAL TEAM (BD TEAM, SALES TEAM and COUPANS TELE TEAM are renamed to the COUPONS names). Old names stored in the database are converted automatically when the page loads.
 - Files changed in this update: `public/index.html`, `lib/people.js`.
+- Viewers do not see the Internal team tab, and the server never sends internal members (or their visits/bookings) to viewer logins. Files: public/index.html, api/people.js, api/acts.js, lib/teams.js.

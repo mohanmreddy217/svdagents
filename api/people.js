@@ -1,6 +1,7 @@
 const { verify } = require('../lib/auth');
 const seed = require('../lib/people');
 const store = require('../lib/store');
+const { isInternal } = require('../lib/teams');
 
 const strip = ({ ph, aad, pan, fs, ad, ...rest }) => rest; // viewers never get these
 
@@ -49,7 +50,7 @@ module.exports = async (req, res) => {
       let list = seed;
       if (store.enabled) list = Object.values(await store.members(seed)).filter((p) => !p.del);
       list = list.slice().sort((a, b) => a.n.localeCompare(b.n));
-      return res.status(200).json(role === 'viewer' ? list.map(strip) : list);
+      return res.status(200).json(role === 'viewer' ? list.filter((p) => !isInternal(p.team)).map(strip) : list);
     }
 
     if (req.method === 'POST') {

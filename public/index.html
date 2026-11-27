@@ -528,6 +528,7 @@ const stOf=(pj,no)=>{const r=PLOTS[pj+':'+no];return r&&ST[r.st]?r.st:((LAY[pj]&
 const aptNos=()=>{const o=[];for(let f=1;f<=APT.floors;f++)for(let n=1;n<=APT.per;n++)o.push(f*100+n);return o};
 const pjCount=pj=>{if(pj===APT.key){const c={ready:0,booked:0,sold:0,mortgage:0,total:0};aptNos().forEach(n=>{c[stOf(pj,n)]++;c.total++});return c}const c={ready:0,booked:0,sold:0,mortgage:0,total:0};Object.keys(LAY[pj].plots).forEach(n=>{c[stOf(pj,+n)]++;c.total++});return c};
 function setMain(v){
+ if(v==='internal'&&role==='viewer')v='team';
  const tv=v==='team'||v==='internal';
  if(tv&&sec!==v){sec=v;teamF='ALL';view='list';const q=$('q');if(q)q.value=''}
  $('teamwrap').classList.toggle('hide',!tv);$('projwrap').classList.toggle('hide',v!=='proj');
@@ -689,7 +690,7 @@ $('go').onclick=async()=>{const un=$('u').value.trim().toLowerCase(),btn=$('go')
  }catch(e){$('err').textContent='Could not finish signing in: '+(e&&e.message?e.message:'network problem')+'. Reload the page (Ctrl+F5) and try again.';btn.disabled=false;return}
  btn.disabled=false;$('pw').value='';
  $('login').classList.add('hide');$('app').classList.remove('hide');document.body.classList.add('in');window.scrollTo(0,0);
- $('rl').textContent=LABEL[role]+' access';openNo=null;pendSt=null;selSet=new Set();multi=false;setMain('team');teamF='ALL';view='list';$('q').value='';$('mp').value=new Date().toISOString().slice(0,7);render()};
+ $('rl').textContent=LABEL[role]+' access';$('ni').classList.toggle('hide',role==='viewer');openNo=null;pendSt=null;selSet=new Set();multi=false;setMain('team');teamF='ALL';view='list';$('q').value='';$('mp').value=new Date().toISOString().slice(0,7);render()};
 $('pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
 $('pwt').onclick=()=>{const h=$('pw').type==='password';$('pw').type=h?'text':'password';$('pwt').textContent=h?'Hide':'Show';$('pwt').setAttribute('aria-pressed',h);$('pwt').setAttribute('aria-label',h?'Hide password':'Show password')};
 $('out').onclick=()=>{role=null;TOKEN='';OV={};ACT={};PLOTS={};PERSIST=false;Object.keys(BASE).forEach(k=>delete BASE[k]);document.body.classList.remove('in');$('app').classList.add('hide');$('login').classList.remove('hide')};

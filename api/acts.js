@@ -1,5 +1,7 @@
 const { verify } = require('../lib/auth');
 const store = require('../lib/store');
+const seed = require('../lib/people');
+const { isInternal } = require('../lib/teams');
 
 const bad = (message, status = 400) => Object.assign(new Error(message), { status });
 const str = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
@@ -36,7 +38,12 @@ module.exports = async (req, res) => {
 
     if (req.method === 'GET') {
       if (!store.enabled) return res.status(200).json([]);
-      return res.status(200).json(Object.values(await store.acts()).filter((a) => !a.del));
+      let acts = Object.values(await store.acts()).filter((a) => !a.del);
+      if (role === 'viewer') {
+        const hidden = new Set(Object.values(await store.members(seed)).filter((p) => isInternal(p.team)).map((p) => p.n));
+        acts = acts.filter((x) => !hidden.has(x.m));
+      }
+      return res.status(200).json(acts);
     }
 
     if (req.method === 'POST') {

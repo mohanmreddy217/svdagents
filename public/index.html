@@ -182,6 +182,35 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
  .seg button{font-size:12px}
 }
 .pwrap{position:relative}.pwrap input{padding-right:76px}.pwt{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--red);font-weight:700;cursor:pointer;padding:10px}
+
+.mainnav{display:flex;gap:8px;margin-bottom:14px}
+.mainnav button{flex:1;max-width:260px;padding:12px 16px;border:0;border-radius:12px;background:rgba(255,255,255,.82);font:inherit;font-weight:700;cursor:pointer;color:var(--ink);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.mainnav button.on{background:var(--red);color:#fff}
+.pjtabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:14px}
+.pjtabs button{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.pjtabs button.on{border-color:var(--red);box-shadow:inset 0 0 0 2px var(--red)}
+.pjtabs b{display:block}.pjtabs small{color:var(--mute)}
+.pj-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.pj-tools{display:flex;gap:6px;flex-wrap:wrap}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.legend button{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--card);border-radius:99px;padding:8px 13px;cursor:pointer;font:inherit;color:var(--ink)}
+.legend button.off{opacity:.45}.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.avail{font-size:13px;color:var(--mute);margin-bottom:10px;overflow-wrap:anywhere}
+.mapwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;max-height:78vh;-webkit-overflow-scrolling:touch}
+.stage{position:relative;width:100%}.stage img{display:block;width:100%;height:auto}
+.stage svg{position:absolute;left:0;top:0;width:100%;height:100%}
+.pl{stroke:#fff;stroke-width:1.5;cursor:pointer;fill-opacity:.55}.pg:hover .pl{fill-opacity:.8}
+.pg.dim{opacity:.12}.pl.sel{stroke:#111;stroke-width:4;fill-opacity:.85}
+.pb{stroke:#fff;stroke-width:2.5;pointer-events:none}
+.pn{fill:#fff;font-weight:700;font-family:Arial,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.st-sold{fill:#d62828}.st-booked{fill:#1f6feb}.st-ready{fill:#2ea043}.st-mortgage{fill:#f06eaa}
+.pj-panel{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
+.chip{display:inline-block;color:#fff;border-radius:99px;padding:3px 11px;font-size:13px;font-weight:700;margin-left:6px}
+.bg-sold{background:#d62828}.bg-booked{background:#1f6feb}.bg-ready{background:#2ea043}.bg-mortgage{background:#f06eaa}
+.sbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.sbtns button{border:0;border-radius:10px;padding:12px 8px;color:#fff;cursor:pointer;font:inherit;font-weight:700;opacity:.55}
+.sbtns button.cur{opacity:1;outline:3px solid #111;outline-offset:2px}
+.pj-panel .fg{margin-top:4px}
 </style>
 </head>
 <body>
@@ -205,20 +234,35 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
     <div class="who"><span class="badge" id="rl"></span><button class="btn sm" id="out">Log out</button></div></header>
   <main>
     <div class="banner hide" id="bn">Saving is not set up yet, so changes stay on this page only until you refresh. Connect the database in Vercel to keep them.</div>
+    <div class="mainnav" id="mainnav"><button id="nt" class="on">Team</button><button id="np">Projects and plots</button></div>
+    <div id="teamwrap">
     <div class="stats" id="stats"></div>
     <div class="grid">
       <aside class="card"><h3 style="font-size:16px">Teams</h3><div class="ladder" id="teams"></div></aside>
       <section class="card">
         <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:12px">
           <div><h2 style="font-size:22px" id="tt"></h2><div class="hint" style="margin:2px 0 0" id="ts"></div></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm hide" id="log">Log visit / booking</button><button class="btn sm hide" id="ren">Rename team</button><button class="btn sm hide" id="add" style="background:var(--red);color:#fff;border-color:transparent">+ Add member</button></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm hide" id="log">Log visit / booking</button><button class="btn sm hide" id="exp">Download Excel</button><button class="btn sm hide" id="ren">Rename team</button><button class="btn sm hide" id="add" style="background:var(--red);color:#fff;border-color:transparent">+ Add member</button></div></div>
         <div class="tools"><div class="seg"><button id="vl" class="on">List</button><button id="vc">Flow chart</button><button id="vp">Performance</button><button id="vm">Commission</button></div><input type="month" id="mp" class="hide" style="width:auto" aria-label="Month"><input type="search" id="q" placeholder="Search name, ID or team" aria-label="Search"></div>
         <div class="tbl" id="list"></div><div class="chart hide" id="chart"></div><div class="tbl hide" id="perf"></div>
       </section>
     </div>
+    </div>
+    <div id="projwrap" class="hide">
+      <div class="card">
+        <div class="pjtabs" id="pj-tabs"></div>
+        <div class="pj-head"><div><h2 style="font-size:22px" id="pj-title"></h2><div class="hint" style="margin:2px 0 0" id="pj-sub"></div></div>
+          <div class="pj-tools"><button class="btn sm" id="zo" aria-label="Zoom out">-</button><button class="btn sm" id="zi" aria-label="Zoom in">+</button><button class="btn sm" id="zr">Fit</button><button class="btn sm hide" id="msel">Select several</button></div></div>
+        <div class="legend" id="pj-legend"></div>
+        <div class="avail" id="pj-avail"></div>
+        <div class="mapwrap" id="mapwrap"><div class="stage" id="stage"></div></div>
+        <div class="pj-panel" id="pj-panel"></div>
+      </div>
+    </div>
   </main>
 </div>
 <dialog id="dlg"></dialog><dialog id="dup" class="dup"></dialog>
+<script src="/layouts/data.js"></script>
 <script>
 const RANKS=[{"n":"Marketing Chief","c":"MCH","h":"Not listed","f":"Not listed"},{"n":"Marketing President","c":"OMP","h":"2900/- + 100/- transport","f":"30% + 50/- transport"},{"n":"Marketing Vice President","c":"MVP","h":"2650/-","f":"27%"},{"n":"Marketing Senior Director","c":"MSD","h":"2400/-","f":"24%"},{"n":"Marketing Director","c":"OMD","h":"2200/-","f":"22%"},{"n":"Deputy Marketing Director","c":"DMD","h":"2000/-","f":"20%"},{"n":"Assistant Marketing Director","c":"AMD","h":"Not listed","f":"Not listed"},{"n":"Chief General Manager","c":"CGM","h":"1800/-","f":"18%"},{"n":"General Manager","c":"OGM","h":"1600/-","f":"16%"},{"n":"Deputy General Manager","c":"DGM","h":"1400/-","f":"14%"},{"n":"Assistant General Manager","c":"AGM","h":"1200/-","f":"12%"},{"n":"Marketing Manager","c":"OMM","h":"1000/-","f":"10%"},{"n":"Marketing Executive","c":"OME","h":"Not set","f":"Not set"},{"n":"Coupens Tele","c":"CTL","h":"Not set","f":"Not set"},{"n":"Others","c":"OTH","h":"Not set","f":"Not set"}];
 const OTH=14;const rn=m=>esc(m.r===OTH&&m.dn?m.dn:RANKS[m.r].n);
@@ -251,7 +295,7 @@ function render(){
  $('ts').textContent=(teamF!=='ALL'&&T[teamF].l?'Leader: '+T[teamF].l+' · ':'')+L.length+' shown';
  $('add').classList.toggle('hide',!can('add'));
  $('bn').classList.toggle('hide',!(role!=='viewer'&&!dbx&&!PERSIST));
- $('ren').classList.toggle('hide',!(can('add')&&teamF!=='ALL'));
+ $('ren').classList.toggle('hide',!(can('add')&&teamF!=='ALL'));$('exp').classList.toggle('hide',role!=='admin');
  [['vl','list'],['vc','chart'],['vp','perf'],['vm','comm']].forEach(([b,v])=>$(b).classList.toggle('on',view===v));
  $('vm').classList.toggle('hide',vw);$('log').classList.toggle('hide',!can('add'));
  $('list').classList.toggle('hide',view!=='list');$('chart').classList.toggle('hide',view!=='chart');
@@ -301,6 +345,15 @@ function drawPerf(R,names){
 async function saveAct(a){
  if(PERSIST){try{const r=await api('/api/acts',{act:a});if(!r.ok){SAVEERR=r.j.message||'';return false}ACT[a.id]=r.j.act;render();return true}catch(e){return false}}
  ACT[a.id]=a;if(dbx){try{await dbx.doc('acts/'+a.id).set(a)}catch(e){delete ACT[a.id];return false}}render();return true}
+function exportCsv(){
+ if(role!=='admin')return;
+ const H=['S.NO','EMPLOYEE ID','EMPLOYEE NAME','DESIGNATION','TEAM','TEAM LEADER','PHONE','DATE OF JOINING','STATUS','AADHAAR NO','PAN NO','FATHER/SPOUSE NAME','SPONSOR','ADDRESS'];
+ const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+ const rows=recs().map((m,i)=>[i+1,idOf(m),m.name,(m.r===OTH&&m.dn?m.dn:RANKS[m.r].n),m.team,m.lead?'Yes':'',m.ph||'',m.d?fmt(m.d):'',m.s==='INACTIVE'?'Inactive':'Active',m.aad?fa(m.aad):'',m.pan||'',m.fs||'',m.sp||'',m.ad||'']);
+ const csv='\ufeff'+[H].concat(rows).map(r=>r.map(q).join(',')).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ a.download='SV_Developers_Employees_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();
+}
 function lab(box){box.querySelectorAll('table:not(.plain)').forEach(t=>{const H=[...t.querySelectorAll('thead th')].map(h=>h.textContent.trim());t.querySelectorAll('tbody tr').forEach(r=>{let i=0;[...r.children].forEach(c=>{c.dataset.label=H[i]||'';i+=c.colSpan||1})})})}
 function openTg(n){if(role!=='admin')return;const m=merged()[n];
  modal(`<h3 class="sora" style="font-size:20px">Targets · ${esc(m.name)}</h3><div class="hint" style="margin:2px 0 0">Monthly targets, applied to every month.</div><div class="fg"><div><label for="tg1">Site visits</label><input id="tg1" type="number" min="0" value="${m.tv||0}"></div><div><label for="tg2">Plot bookings</label><input id="tg2" type="number" min="0" value="${m.tb||0}"></div></div><div class="fe" id="tge"></div><div class="row2"><button class="btn" id="tgs">Save</button><button class="btn ghost" id="tgc">Cancel</button></div>`);
@@ -426,7 +479,101 @@ function askDel(n){if(!can('del'))return;const m=merged()[n];
 }
 $('dlg').addEventListener('click',e=>{if(e.target===$('dlg'))$('dlg').close()});
 $('q').oninput=render;
-$('add').onclick=()=>openForm();$('log').onclick=openLog;$('vp').onclick=()=>{view='perf';render()};$('vm').onclick=()=>{view='comm';render()};$('mp').onchange=render;$('hlogo').src=document.querySelector('#login .brand.logo img').src;$('ren').onclick=openRename;$('vl').onclick=()=>{view='list';render()};$('vc').onclick=()=>{view='chart';render()};
+$('add').onclick=()=>openForm();$('log').onclick=openLog;$('vp').onclick=()=>{view='perf';render()};$('vm').onclick=()=>{view='comm';render()};$('mp').onchange=render;$('hlogo').src=document.querySelector('#login .brand.logo img').src;$('ren').onclick=openRename;$('exp').onclick=exportCsv;$('vl').onclick=()=>{view='list';render()};$('vc').onclick=()=>{view='chart';render()};
+
+/* ---------- Projects and plots ---------- */
+const ST={ready:{l:'Ready to buy',c:'#2ea043'},booked:{l:'Booked',c:'#1f6feb'},sold:{l:'Sold',c:'#d62828'},mortgage:{l:'Bank mortgage',c:'#f06eaa'}};
+const SKEYS=['ready','booked','sold','mortgage'];
+const LAY=window.LAYOUTS||{};
+let PLOTS={},curProj=Object.keys(LAY)[0],zoom=1,hideSt=new Set(),multi=false,selSet=new Set(),openNo=null,pendSt=null,stageProj=null,pjMsg='';
+const stOf=(pj,no)=>{const r=PLOTS[pj+':'+no];return r&&ST[r.st]?r.st:((LAY[pj].mortgage||[]).indexOf(no)>-1?'mortgage':'ready')};
+const pjCount=pj=>{const c={ready:0,booked:0,sold:0,mortgage:0,total:0};Object.keys(LAY[pj].plots).forEach(n=>{c[stOf(pj,+n)]++;c.total++});return c};
+function setMain(v){
+ $('teamwrap').classList.toggle('hide',v!=='team');$('projwrap').classList.toggle('hide',v!=='proj');
+ $('nt').classList.toggle('on',v==='team');$('np').classList.toggle('on',v==='proj');
+ if(v==='proj')renderProj();
+}
+function renderProj(){
+ const L=LAY[curProj];if(!L)return;const c=pjCount(curProj),edit=can('add');
+ $('pj-tabs').innerHTML=Object.keys(LAY).map(k=>{const q=pjCount(k);return `<button data-p="${k}" class="${k===curProj?'on':''}"><b>${esc(LAY[k].name)}</b><small>${q.ready} ready of ${q.total} plots</small></button>`}).join('');
+ $('pj-title').textContent=L.name;$('pj-sub').textContent=L.sub+' - '+c.total+' plots';
+ $('pj-legend').innerHTML=SKEYS.map(s=>`<button data-s="${s}" class="${hideSt.has(s)?'off':''}" aria-pressed="${!hideSt.has(s)}"><i style="background:${ST[s].c}"></i>${ST[s].l} <b>${c[s]}</b></button>`).join('');
+ const rd=Object.keys(L.plots).map(Number).filter(n=>stOf(curProj,n)==='ready').sort((a,b)=>a-b);
+ $('pj-avail').innerHTML='<b>Ready to buy ('+rd.length+'):</b> '+(rd.length?rd.join(', '):'none right now');
+ $('msel').classList.toggle('hide',!edit);$('msel').textContent=multi?'Done selecting':'Select several';
+ const stage=$('stage');
+ if(stageProj!==curProj){stage.innerHTML='<img alt="'+esc(L.name)+' layout" src="'+L.img+'"><svg id="plsvg"></svg>';stageProj=curProj}
+ stage.style.width=(zoom*100)+'%';
+ const svg=$('plsvg');if(!svg.setAttribute)return;
+ svg.setAttribute('viewBox','0 0 '+L.w+' '+L.h);
+ svg.innerHTML=Object.keys(L.plots).map(k=>{const n=+k,p=L.plots[k],st=stOf(curProj,n),sel=selSet.has(n)||openNo===n&&!multi,fs=Math.round(p.r*(n>99?0.82:1.05));
+  return `<g data-n="${n}" class="pg${hideSt.has(st)?' dim':''}"><polygon class="pl st-${st}${sel?' sel':''}" points="${p.p.map(q=>q.join(',')).join(' ')}"/><circle class="pb st-${st}" cx="${p.c[0]}" cy="${p.c[1]}" r="${p.r}"/><text class="pn" x="${p.c[0]}" y="${p.c[1]}" font-size="${fs}">${n}</text></g>`}).join('');
+ renderPanel();
+}
+function fmtAt(a){return a?fmt(a.slice(0,10)):''}
+function renderPanel(){
+ const el=$('pj-panel'),edit=can('add'),L=LAY[curProj];
+ if(multi&&edit){
+  const ns=[...selSet].sort((a,b)=>a-b);
+  el.innerHTML=ns.length?`<b>${ns.length} plot${ns.length>1?'s':''} selected:</b> ${ns.join(', ')}
+  <div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${pendSt===s?'cur':''}">${ST[s].l}</button>`).join('')}</div>
+  <div class="fg"><div class="w"><label for="pnote">Note (optional, applies to all)</label><input id="pnote" type="text" maxlength="120"></div></div>
+  <div class="fe" id="pjerr">${esc(pjMsg)}</div><div class="row2"><button class="btn" id="pjsave">Apply to selected</button><button class="btn ghost" id="pjclr">Clear selection</button></div>`
+  :'<div class="hint" style="margin:0">Tap plots on the map to select them, then choose a status for all of them.</div>';
+  return;
+ }
+ if(openNo==null){el.innerHTML='<div class="hint" style="margin:0">Tap a plot on the map to see its status'+(edit?' and change it.':'.')+'</div>';return}
+ const st=stOf(curProj,openNo),rec=PLOTS[curProj+':'+openNo];
+ let h=`<div style="font-size:18px"><b>Plot ${openNo}</b> - ${esc(L.name)}<span class="chip bg-${st}">${ST[st].l}</span></div>`;
+ if(rec&&rec.at)h+=`<div class="hint" style="margin:4px 0 0">Last changed ${fmtAt(rec.at)}${rec.by?' by '+esc(rec.by):''}</div>`;
+ if(!edit){if(rec&&rec.client)h+=`<div style="margin-top:6px">Client: ${esc(rec.client)}</div>`;el.innerHTML=h;return}
+ const ps=pendSt||st;
+ h+=`<div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${ps===s?'cur':''}">${ST[s].l}</button>`).join('')}</div>
+ <div class="fg"><div><label for="pcl">Client name (optional)</label><input id="pcl" type="text" maxlength="80" value="${esc(rec?rec.client:'')}"></div>
+ <div><label for="pnote">Note (optional)</label><input id="pnote" type="text" maxlength="120" value="${esc(rec?rec.note:'')}"></div></div>
+ <div class="fe" id="pjerr">${esc(pjMsg)}</div><div class="row2"><button class="btn" id="pjsave">Save</button></div>`;
+ el.innerHTML=h;
+}
+async function savePlots(list){
+ pjMsg='';const now=new Date().toISOString();
+ if(PERSIST){
+  try{const r=await api('/api/plots',{plots:list});
+   if(!r.ok){pjMsg=r.j.message||'Could not save. Try again.';return false}
+   (r.j.plots||[]).forEach(p=>PLOTS[p.id]=p);return true}
+  catch(e){pjMsg='Could not save. Check your internet and try again.';return false}
+ }
+ list.forEach(p=>{PLOTS[p.proj+':'+p.no]={id:p.proj+':'+p.no,proj:p.proj,no:p.no,st:p.st,client:p.client||'',note:p.note||'',by:role,at:now}});return true;
+}
+$('mainnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMain(b.id==='np'?'proj':'team')});
+$('pj-tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curProj=b.dataset.p;openNo=null;pendSt=null;selSet=new Set();zoom=1;pjMsg='';renderProj();$('mapwrap').scrollTo&&$('mapwrap').scrollTo(0,0)});
+$('pj-legend').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const s=b.dataset.s;hideSt.has(s)?hideSt.delete(s):hideSt.add(s);renderProj()});
+$('stage').addEventListener('click',e=>{
+ const g=e.target.closest('g[data-n]');if(!g)return;const n=+g.dataset.n;pjMsg='';
+ if(multi&&can('add')){selSet.has(n)?selSet.delete(n):selSet.add(n)}else{openNo=n;pendSt=null}
+ renderProj();
+});
+$('pj-panel').addEventListener('click',async e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.b){pendSt=b.dataset.b;pjMsg='';const keep={cl:$('pcl')&&$('pcl').value,nt:$('pnote')&&$('pnote').value};renderPanel();if($('pcl')&&keep.cl!=null)$('pcl').value=keep.cl;if($('pnote')&&keep.nt!=null)$('pnote').value=keep.nt;return}
+ if(b.id==='pjclr'){selSet=new Set();pjMsg='';renderProj();return}
+ if(b.id==='pjsave'){
+  if(!can('add'))return;
+  const note=($('pnote').value||'').trim(),client=$('pcl')?$('pcl').value.trim():'';
+  if(multi){
+   if(!pendSt){pjMsg='Choose a status first.';renderPanel();return}
+   const list=[...selSet].map(n=>({proj:curProj,no:n,st:pendSt,client:'',note}));
+   if(await savePlots(list)){selSet=new Set();pendSt=null}
+  }else{
+   const st=pendSt||stOf(curProj,openNo);
+   if(await savePlots([{proj:curProj,no:openNo,st,client,note}]))pendSt=null;
+  }
+  renderProj();
+ }
+});
+$('zi').onclick=()=>{zoom=Math.min(4,zoom+0.5);renderProj()};
+$('zo').onclick=()=>{zoom=Math.max(1,zoom-0.5);renderProj()};
+$('zr').onclick=()=>{zoom=1;renderProj()};
+$('msel').onclick=()=>{multi=!multi;selSet=new Set();pendSt=null;pjMsg='';renderProj()};
 $('go').onclick=async()=>{const un=$('u').value.trim().toLowerCase(),btn=$('go');
  if(!un||!$('pw').value){$('err').textContent='Enter your username and password.';return}
  btn.disabled=true;$('err').textContent='';
@@ -437,15 +584,15 @@ $('go').onclick=async()=>{const un=$('u').value.trim().toLowerCase(),btn=$('go')
   const pr=await fetch('/api/people',{headers:{Authorization:'Bearer '+TOKEN}});
   if(!pr.ok)throw 0;
   Object.keys(BASE).forEach(k=>delete BASE[k]);(await pr.json()).forEach(p=>BASE[p.n]=p);
-  PERSIST=pr.headers.get('x-persist')==='1';ACT={};
-  if(PERSIST){const ar=await fetch('/api/acts',{headers:{Authorization:'Bearer '+TOKEN}});if(ar.ok)(await ar.json()).forEach(a=>ACT[a.id]=a)}
+  PERSIST=pr.headers.get('x-persist')==='1';ACT={};PLOTS={};
+  if(PERSIST){const ar=await fetch('/api/acts',{headers:{Authorization:'Bearer '+TOKEN}});if(ar.ok)(await ar.json()).forEach(a=>ACT[a.id]=a);const plr=await fetch('/api/plots',{headers:{Authorization:'Bearer '+TOKEN}});if(plr.ok)(await plr.json()).forEach(p=>PLOTS[p.id]=p)}
  }catch(e){$('err').textContent='Could not sign in. Check your connection and try again.';btn.disabled=false;return}
  btn.disabled=false;$('pw').value='';
  $('login').classList.add('hide');$('app').classList.remove('hide');document.body.classList.add('in');window.scrollTo(0,0);
- $('rl').textContent=LABEL[role]+' access';teamF='ALL';view='list';$('q').value='';$('mp').value=new Date().toISOString().slice(0,7);render()};
+ $('rl').textContent=LABEL[role]+' access';openNo=null;pendSt=null;selSet=new Set();multi=false;setMain('team');teamF='ALL';view='list';$('q').value='';$('mp').value=new Date().toISOString().slice(0,7);render()};
 $('pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
 $('pwt').onclick=()=>{const h=$('pw').type==='password';$('pw').type=h?'text':'password';$('pwt').textContent=h?'Hide':'Show';$('pwt').setAttribute('aria-pressed',h);$('pwt').setAttribute('aria-label',h?'Hide password':'Show password')};
-$('out').onclick=()=>{role=null;TOKEN='';OV={};ACT={};PERSIST=false;Object.keys(BASE).forEach(k=>delete BASE[k]);document.body.classList.remove('in');$('app').classList.add('hide');$('login').classList.remove('hide')};
+$('out').onclick=()=>{role=null;TOKEN='';OV={};ACT={};PLOTS={};PERSIST=false;Object.keys(BASE).forEach(k=>delete BASE[k]);document.body.classList.remove('in');$('app').classList.add('hide');$('login').classList.remove('hide')};
 (async()=>{try{if(window.claude){dbx=await claude.use('db');
  if(dbx)dbx.collection('acts').onSnapshot(s=>{ACT={};s.docs.forEach(d=>ACT[d.id]=d.data());if(role)render()},()=>{});
  if(dbx)dbx.collection('members').onSnapshot(s=>{OV={};s.docs.forEach(d=>OV[d.id]=d.data());if(role)render()},()=>{});}}catch(e){dbx=null}

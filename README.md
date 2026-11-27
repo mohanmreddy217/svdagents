@@ -5,9 +5,11 @@ Changes made in the page are saved in a database, so everyone sees them.
 
 ## Folder layout
 - public/index.html  the web page (no passwords or member data inside)
+- public/layouts/    the three layout images (Sri City, Sri Vanam, Sri Nivasam) and the plot outlines (data.js)
 - api/login.js       checks the password and returns a signed token
 - api/people.js      members: read, add, edit, delete (rules are checked on the server)
-- api/acts.js        site visits and plot bookings
+- api/acts.js        site visits and plot bookings (logged by agents)
+- api/plots.js       status of every plot on the project layouts (ready, booked, sold, bank mortgage)
 - lib/auth.js        sign-in tokens
 - lib/store.js       talks to the database
 - lib/people.js      the starting list of members (copied into the database the first time)
@@ -31,3 +33,11 @@ If the yellow "Saving is not set up yet" bar still shows, the database is not co
 - Admin: add, edit, delete members; edit or delete logged visits and bookings.
 - Editor: add and edit members; log new visits and bookings.
 - Viewer: read only, without phone, Aadhaar, PAN, family name or address.
+
+## Projects and plots
+- Open the "Projects and plots" tab. Pick a project, then tap a plot.
+- Colours: green = ready to buy, blue = booked, red = sold, pink = bank mortgage.
+- Admin and Editor can change a plot (status, client name, note), one at a time or with "Select several".
+- Viewer sees the colours only (no client names or notes).
+- Plot statuses are saved in the same database as the members. Plots start as ready to buy, except the
+  pink mortgage plots shown on the layouts (Sri Nivasam 18-21, 29-36, 46 and Sri City 77-85, 98-107).

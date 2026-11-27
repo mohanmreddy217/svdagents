@@ -41,3 +41,12 @@ If the yellow "Saving is not set up yet" bar still shows, the database is not co
 - Viewer sees the colours only (no client names or notes).
 - Plot statuses are saved in the same database as the members. Plots start as ready to buy, except the
   pink mortgage plots shown on the layouts (Sri Nivasam 18-21, 29-36, 46 and Sri City 77-85, 98-107).
+
+## Projects, plots and flats
+
+- Projects: Sri City, Sri Vanam, Sri Nivasam, Siri Vanam (plot maps) and SV Apartments (5 floors x 6 flats = 30 flats).
+- Colours: Ready to buy = white, Booked = green, Sold = red, Bank mortgage = pink.
+- Admin and Editor can change any plot or flat (single or "Select several"); Viewer is read-only.
+- Plot size (sq yd and sq ft) and dimensions come from the layout files in `public/layouts/data.js` (`a` = area, `d` = [short, long] side in feet, `x` = 1 means approximate).
+- Flats are numbered by floor: 101-106 (1st floor), 201-206 (2nd) ... 501-506 (5th). Facing is shown for every plot (from the road side, using each layout compass) and flat (editable).
+- Files changed in this update: `public/index.html`, `public/layouts/*`, `api/plots.js`.

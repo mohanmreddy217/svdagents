@@ -199,14 +199,17 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
 .mapwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;max-height:78vh;-webkit-overflow-scrolling:touch}
 .stage{position:relative;width:100%}.stage img{display:block;width:100%;height:auto}
 .stage svg{position:absolute;left:0;top:0;width:100%;height:100%}
-.pl{stroke:#fff;stroke-width:1.5;cursor:pointer;fill-opacity:.55}.pg:hover .pl{fill-opacity:.8}
+.pl{stroke:#fff;stroke-width:1.5;cursor:pointer;fill-opacity:.55}.pl.st-ready{stroke:#1b4332;stroke-width:2;fill-opacity:.8}.pg:hover .pl{fill-opacity:.8}
 .pg.dim{opacity:.12}.pl.sel{stroke:#111;stroke-width:4;fill-opacity:.85}
 .pb{stroke:#fff;stroke-width:2.5;pointer-events:none}
 .pn{fill:#fff;font-weight:700;font-family:Arial,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none}
-.st-sold{fill:#d62828}.st-booked{fill:#1f6feb}.st-ready{fill:#2ea043}.st-mortgage{fill:#f06eaa}
+.st-sold{fill:#d62828}.st-booked{fill:#2ea043}.st-ready{fill:#fff}.st-mortgage{fill:#f06eaa}.pb.st-ready{stroke:#1b4332}.pn.pn-ready{fill:#1b4332}
 .pj-panel{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
 .chip{display:inline-block;color:#fff;border-radius:99px;padding:3px 11px;font-size:13px;font-weight:700;margin-left:6px}
-.bg-sold{background:#d62828}.bg-booked{background:#1f6feb}.bg-ready{background:#2ea043}.bg-mortgage{background:#f06eaa}
+.bg-sold{background:#d62828}.bg-booked{background:#2ea043}.bg-ready{background:#fff;color:#1b4332;border:1.5px solid #1b4332}.bg-mortgage{background:#f06eaa}
+.legend i.lw{border:1.5px solid #1b4332}.sbtns button.sw{color:#1b4332;border:2px solid #1b4332}
+.sz{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}.sz div{background:var(--bg,#f4f7f4);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}.sz b{display:block;font-size:16px}
+.apt{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}.agrid{display:grid;grid-template-columns:70px repeat(6,minmax(0,1fr));gap:6px;align-items:stretch}.agrid .fl{display:flex;align-items:center;font-weight:700;font-size:13px}.agrid button{border-radius:10px;padding:12px 2px;font:inherit;font-weight:700;cursor:pointer;border:1.5px solid #1b4332;color:#fff}.agrid button.bg-ready{color:#1b4332}.agrid button.sel{outline:3px solid #111;outline-offset:1px}.agrid .hd{font-size:12px;color:var(--mute);text-align:center}.aptimg{position:relative;max-width:900px}.aptimg img{display:block;width:100%;height:auto;border-radius:10px}.aptimg svg{position:absolute;left:0;top:0;width:100%;height:100%}.afl{margin:6px 0;font-size:13px;color:var(--mute)}
 .sbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
 .sbtns button{border:0;border-radius:10px;padding:12px 8px;color:#fff;cursor:pointer;font:inherit;font-weight:700;opacity:.55}
 .sbtns button.cur{opacity:1;outline:3px solid #111;outline-offset:2px}
@@ -252,9 +255,10 @@ th,td{padding:8px 6px;font-size:14px;overflow-wrap:anywhere}.mono{font-size:12px
       <div class="card">
         <div class="pjtabs" id="pj-tabs"></div>
         <div class="pj-head"><div><h2 style="font-size:22px" id="pj-title"></h2><div class="hint" style="margin:2px 0 0" id="pj-sub"></div></div>
-          <div class="pj-tools"><button class="btn sm" id="zo" aria-label="Zoom out">-</button><button class="btn sm" id="zi" aria-label="Zoom in">+</button><button class="btn sm" id="zr">Fit</button><button class="btn sm hide" id="msel">Select several</button></div></div>
+          <div class="pj-tools"><button class="btn sm" id="zo" aria-label="Zoom out">-</button><button class="btn sm" id="zi" aria-label="Zoom in">+</button><button class="btn sm" id="zr">Fit</button><button class="btn sm" id="pbadge">Show: area</button><button class="btn sm hide" id="msel">Select several</button></div></div>
         <div class="legend" id="pj-legend"></div>
         <div class="avail" id="pj-avail"></div>
+        <div class="apt hide" id="aptwrap"></div>
         <div class="mapwrap" id="mapwrap"><div class="stage" id="stage"></div></div>
         <div class="pj-panel" id="pj-panel"></div>
       </div>
@@ -482,41 +486,60 @@ $('q').oninput=render;
 $('add').onclick=()=>openForm();$('log').onclick=openLog;$('vp').onclick=()=>{view='perf';render()};$('vm').onclick=()=>{view='comm';render()};$('mp').onchange=render;$('hlogo').src=document.querySelector('#login .brand.logo img').src;$('ren').onclick=openRename;$('exp').onclick=exportCsv;$('vl').onclick=()=>{view='list';render()};$('vc').onclick=()=>{view='chart';render()};
 
 /* ---------- Projects and plots ---------- */
-const ST={ready:{l:'Ready to buy',c:'#2ea043'},booked:{l:'Booked',c:'#1f6feb'},sold:{l:'Sold',c:'#d62828'},mortgage:{l:'Bank mortgage',c:'#f06eaa'}};
+const ST={ready:{l:'Ready to buy',c:'#ffffff'},booked:{l:'Booked',c:'#2ea043'},sold:{l:'Sold',c:'#d62828'},mortgage:{l:'Bank mortgage',c:'#f06eaa'}};
 const SKEYS=['ready','booked','sold','mortgage'];
 const LAY=window.LAYOUTS||{};
+const APT={key:'svapts',name:'SV Apartments',floors:5,per:6,img:'/layouts/svapts.jpg',w:1200,h:943,area:945,
+ rects:{6:[15,10,288,388],5:[435,10,712,388],4:[855,10,1181,388],1:[15,481,300,931],2:[388,481,669,931],3:[906,481,1181,931]}};
+let aptFloor=1,showArea=false;
+const ftIn=x=>{const i=Math.round(x*12);return Math.floor(i/12)+"'-"+(i%12)+'"'};
+const sqf=a=>Math.round(a*9);
+const DIRN={N:'North',NE:'North-East',E:'East',SE:'South-East',S:'South',SW:'South-West',W:'West',NW:'North-West'};
+const aptFace=no=>(no%100)>=4?'N':'S';
+const faceTxt=f=>f&&f.length?DIRN[f[0]]+(f.length>1?' (corner plot, also '+DIRN[f[1]]+')':''):'-';
+const swc=s=>s==='ready'?' sw':'';
 let PLOTS={},curProj=Object.keys(LAY)[0],zoom=1,hideSt=new Set(),multi=false,selSet=new Set(),openNo=null,pendSt=null,stageProj=null,pjMsg='';
-const stOf=(pj,no)=>{const r=PLOTS[pj+':'+no];return r&&ST[r.st]?r.st:((LAY[pj].mortgage||[]).indexOf(no)>-1?'mortgage':'ready')};
-const pjCount=pj=>{const c={ready:0,booked:0,sold:0,mortgage:0,total:0};Object.keys(LAY[pj].plots).forEach(n=>{c[stOf(pj,+n)]++;c.total++});return c};
+const stOf=(pj,no)=>{const r=PLOTS[pj+':'+no];return r&&ST[r.st]?r.st:((LAY[pj]&&LAY[pj].mortgage||[]).indexOf(no)>-1?'mortgage':'ready')};
+const aptNos=()=>{const o=[];for(let f=1;f<=APT.floors;f++)for(let n=1;n<=APT.per;n++)o.push(f*100+n);return o};
+const pjCount=pj=>{if(pj===APT.key){const c={ready:0,booked:0,sold:0,mortgage:0,total:0};aptNos().forEach(n=>{c[stOf(pj,n)]++;c.total++});return c}const c={ready:0,booked:0,sold:0,mortgage:0,total:0};Object.keys(LAY[pj].plots).forEach(n=>{c[stOf(pj,+n)]++;c.total++});return c};
 function setMain(v){
  $('teamwrap').classList.toggle('hide',v!=='team');$('projwrap').classList.toggle('hide',v!=='proj');
  $('nt').classList.toggle('on',v==='team');$('np').classList.toggle('on',v==='proj');
  if(v==='proj')renderProj();
 }
+function areaBy(pj){const o={ready:0,booked:0,sold:0,mortgage:0,all:0};Object.keys(LAY[pj].plots).forEach(n=>{const a=LAY[pj].plots[n].a||0;o[stOf(pj,+n)]+=a;o.all+=a});return o}
 function renderProj(){
- const L=LAY[curProj];if(!L)return;const c=pjCount(curProj),edit=can('add');
- $('pj-tabs').innerHTML=Object.keys(LAY).map(k=>{const q=pjCount(k);return `<button data-p="${k}" class="${k===curProj?'on':''}"><b>${esc(LAY[k].name)}</b><small>${q.ready} ready of ${q.total} plots</small></button>`}).join('');
- $('pj-title').textContent=L.name;$('pj-sub').textContent=L.sub+' - '+c.total+' plots';
- $('pj-legend').innerHTML=SKEYS.map(s=>`<button data-s="${s}" class="${hideSt.has(s)?'off':''}" aria-pressed="${!hideSt.has(s)}"><i style="background:${ST[s].c}"></i>${ST[s].l} <b>${c[s]}</b></button>`).join('');
- const rd=Object.keys(L.plots).map(Number).filter(n=>stOf(curProj,n)==='ready').sort((a,b)=>a-b);
- $('pj-avail').innerHTML='<b>Ready to buy ('+rd.length+'):</b> '+(rd.length?rd.join(', '):'none right now');
+ const isApt=curProj===APT.key;
+ const edit=can('add');
+ const tabs=Object.keys(LAY).map(k=>{const q=pjCount(k);return `<button data-p="${k}" class="${k===curProj?'on':''}"><b>${esc(LAY[k].name)}</b><small>${q.ready} ready of ${q.total} plots</small></button>`});
+ {const q=pjCount(APT.key);tabs.push(`<button data-p="${APT.key}" class="${isApt?'on':''}"><b>${APT.name}</b><small>${q.ready} ready of ${q.total} flats</small></button>`)}
+ $('pj-tabs').innerHTML=tabs.join('');
+ ['mapwrap','zo','zi','zr','pbadge'].forEach(i=>$(i).classList.toggle('hide',isApt));$('aptwrap').classList.toggle('hide',!isApt);
  $('msel').classList.toggle('hide',!edit);$('msel').textContent=multi?'Done selecting':'Select several';
+ if(isApt){renderApt();return}
+ const L=LAY[curProj];if(!L)return;const c=pjCount(curProj),ar=areaBy(curProj);
+ $('pbadge').textContent=showArea?'Show: plot no.':'Show: area';
+ $('pj-title').textContent=L.name;$('pj-sub').textContent=L.sub+' - '+c.total+' plots - '+Math.round(ar.all)+' sq yd ('+sqf(ar.all).toLocaleString('en-IN')+' sq ft) plotted';
+ $('pj-legend').innerHTML=SKEYS.map(s=>`<button data-s="${s}" class="${hideSt.has(s)?'off':''}" aria-pressed="${!hideSt.has(s)}"><i class="${s==='ready'?'lw':''}" style="background:${ST[s].c}"></i>${ST[s].l} <b>${c[s]}</b> <small>${Math.round(ar[s])} sq yd</small></button>`).join('');
+ const rd=Object.keys(L.plots).map(Number).filter(n=>stOf(curProj,n)==='ready').sort((a,b)=>a-b);
+ $('pj-avail').innerHTML='<b>Ready to buy ('+rd.length+'):</b> '+(rd.length?rd.map(n=>n+' <small>('+Math.round(L.plots[n].a)+' sq yd)</small>').join(', '):'none right now');
  const stage=$('stage');
  if(stageProj!==curProj){stage.innerHTML='<img alt="'+esc(L.name)+' layout" src="'+L.img+'"><svg id="plsvg"></svg>';stageProj=curProj}
  stage.style.width=(zoom*100)+'%';
  const svg=$('plsvg');if(!svg.setAttribute)return;
  svg.setAttribute('viewBox','0 0 '+L.w+' '+L.h);
- svg.innerHTML=Object.keys(L.plots).map(k=>{const n=+k,p=L.plots[k],st=stOf(curProj,n),sel=selSet.has(n)||openNo===n&&!multi,fs=Math.round(p.r*(n>99?0.82:1.05));
-  return `<g data-n="${n}" class="pg${hideSt.has(st)?' dim':''}"><polygon class="pl st-${st}${sel?' sel':''}" points="${p.p.map(q=>q.join(',')).join(' ')}"/><circle class="pb st-${st}" cx="${p.c[0]}" cy="${p.c[1]}" r="${p.r}"/><text class="pn" x="${p.c[0]}" y="${p.c[1]}" font-size="${fs}">${n}</text></g>`}).join('');
+ svg.innerHTML=Object.keys(L.plots).map(k=>{const n=+k,p=L.plots[k],st=stOf(curProj,n),sel=selSet.has(n)||openNo===n&&!multi,fs=Math.round(p.r*(showArea?0.72:(n>99?0.82:1.05))),lab=showArea?Math.round(p.a):n;
+  return `<g data-n="${n}" class="pg${hideSt.has(st)?' dim':''}"><polygon class="pl st-${st}${sel?' sel':''}" points="${p.p.map(q=>q.join(',')).join(' ')}"/><circle class="pb st-${st}" cx="${p.c[0]}" cy="${p.c[1]}" r="${p.r}"/><text class="pn pn-${st}" x="${p.c[0]}" y="${p.c[1]}" font-size="${fs}">${lab}</text></g>`}).join('');
  renderPanel();
 }
 function fmtAt(a){return a?fmt(a.slice(0,10)):''}
 function renderPanel(){
+ if(curProj===APT.key){renderAptPanel();return}
  const el=$('pj-panel'),edit=can('add'),L=LAY[curProj];
  if(multi&&edit){
   const ns=[...selSet].sort((a,b)=>a-b);
   el.innerHTML=ns.length?`<b>${ns.length} plot${ns.length>1?'s':''} selected:</b> ${ns.join(', ')}
-  <div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${pendSt===s?'cur':''}">${ST[s].l}</button>`).join('')}</div>
+  <div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${pendSt===s?'cur':''}${swc(s)}">${ST[s].l}</button>`).join('')}</div>
   <div class="fg"><div class="w"><label for="pnote">Note (optional, applies to all)</label><input id="pnote" type="text" maxlength="120"></div></div>
   <div class="fe" id="pjerr">${esc(pjMsg)}</div><div class="row2"><button class="btn" id="pjsave">Apply to selected</button><button class="btn ghost" id="pjclr">Clear selection</button></div>`
   :'<div class="hint" style="margin:0">Tap plots on the map to select them, then choose a status for all of them.</div>';
@@ -525,13 +548,48 @@ function renderPanel(){
  if(openNo==null){el.innerHTML='<div class="hint" style="margin:0">Tap a plot on the map to see its status'+(edit?' and change it.':'.')+'</div>';return}
  const st=stOf(curProj,openNo),rec=PLOTS[curProj+':'+openNo];
  let h=`<div style="font-size:18px"><b>Plot ${openNo}</b> - ${esc(L.name)}<span class="chip bg-${st}">${ST[st].l}</span></div>`;
+ {const p=L.plots[openNo];if(p&&p.a)h+=`<div class="sz"><div>Plot size<b>${p.a} sq yd</b></div><div>In square feet<b>${sqf(p.a).toLocaleString('en-IN')} sq ft</b></div><div>Facing<b>${faceTxt(p.f)}</b><small>road side</small></div><div>Dimensions<b>${p.d?ftIn(p.d[1])+' x '+ftIn(p.d[0]):'Irregular shape'}</b><small>${p.d?(p.x?'approximate - check layout':'as per layout'):'see layout image'}</small></div></div>`}
  if(rec&&rec.at)h+=`<div class="hint" style="margin:4px 0 0">Last changed ${fmtAt(rec.at)}${rec.by?' by '+esc(rec.by):''}</div>`;
  if(!edit){if(rec&&rec.client)h+=`<div style="margin-top:6px">Client: ${esc(rec.client)}</div>`;el.innerHTML=h;return}
  const ps=pendSt||st;
- h+=`<div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${ps===s?'cur':''}">${ST[s].l}</button>`).join('')}</div>
+ h+=`<div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${ps===s?'cur':''}${swc(s)}">${ST[s].l}</button>`).join('')}</div>
  <div class="fg"><div><label for="pcl">Client name (optional)</label><input id="pcl" type="text" maxlength="80" value="${esc(rec?rec.client:'')}"></div>
  <div><label for="pnote">Note (optional)</label><input id="pnote" type="text" maxlength="120" value="${esc(rec?rec.note:'')}"></div></div>
  <div class="fe" id="pjerr">${esc(pjMsg)}</div><div class="row2"><button class="btn" id="pjsave">Save</button></div>`;
+ el.innerHTML=h;
+}
+function renderApt(){
+ const c=pjCount(APT.key),edit=can('add');
+ $('pj-title').textContent=APT.name;$('pj-sub').textContent=APT.floors+' floors x '+APT.per+' flats per floor = '+c.total+' flats (2 BHK, '+APT.area+' sq ft each unless edited)';
+ $('pj-legend').innerHTML=SKEYS.map(s=>`<button data-s="${s}" class="${hideSt.has(s)?'off':''}" aria-pressed="${!hideSt.has(s)}"><i class="${s==='ready'?'lw':''}" style="background:${ST[s].c}"></i>${ST[s].l} <b>${c[s]}</b></button>`).join('');
+ const rd=aptNos().filter(n=>stOf(APT.key,n)==='ready');
+ $('pj-avail').innerHTML='<b>Ready to buy ('+rd.length+'):</b> '+(rd.length?rd.map(n=>'F'+Math.floor(n/100)+'-'+(n%100)).join(', '):'none right now');
+ let g='<div class="agrid"><div></div>'+[1,2,3,4,5,6].map(n=>`<div class="hd">Flat ${n}</div>`).join('');
+ for(let f=APT.floors;f>=1;f--){g+=`<div class="fl">Floor ${f}</div>`;for(let n=1;n<=APT.per;n++){const no=f*100+n,st=stOf(APT.key,no),sel=selSet.has(no)||openNo===no&&!multi;g+=`<button data-f="${no}" class="bg-${st}${sel?' sel':''}${hideSt.has(st)?' dim':''}" style="${hideSt.has(st)?'opacity:.25':''}" aria-label="Floor ${f} flat ${n}, ${ST[st].l}">${no}</button>`}}
+ g+='</div><div class="afl"><b>Typical floor plan - Floor '+aptFloor+'</b> (same layout on every floor). Tap a flat on the plan or on the grid above.</div><div class="aptimg"><img alt="Typical floor plan" src="'+APT.img+'"><svg viewBox="0 0 '+APT.w+' '+APT.h+'">'+
+ Object.keys(APT.rects).map(n=>{const r=APT.rects[n],no=aptFloor*100+(+n),st=stOf(APT.key,no),sel=selSet.has(no)||openNo===no&&!multi;return `<g data-a="${no}" style="cursor:pointer"><rect class="pl st-${st}${sel?' sel':''}" x="${r[0]}" y="${r[1]}" width="${r[2]-r[0]}" height="${r[3]-r[1]}"/><circle class="pb st-${st}" cx="${(r[0]+r[2])/2}" cy="${(r[1]+r[3])/2}" r="46"/><text class="pn pn-${st}" x="${(r[0]+r[2])/2}" y="${(r[1]+r[3])/2}" font-size="38">${no}</text></g>`}).join('')+'</svg></div>';
+ $('aptwrap').innerHTML=g;renderAptPanel();
+}
+function renderAptPanel(){
+ const el=$('pj-panel'),edit=can('add');
+ if(multi&&edit){
+  const ns=[...selSet].sort((a,b)=>a-b);
+  el.innerHTML=ns.length?`<b>${ns.length} flat${ns.length>1?'s':''} selected:</b> ${ns.join(', ')}
+  <div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${pendSt===s?'cur':''}${swc(s)}">${ST[s].l}</button>`).join('')}</div>
+  <div class="fe" id="pjerr">${esc(pjMsg)}</div><div class="row2"><button class="btn" id="pjsave">Apply to selected</button><button class="btn ghost" id="pjclr">Clear selection</button></div>`
+  :'<div class="hint" style="margin:0">Tap flats to select them, then choose a status for all of them.</div>';return}
+ if(openNo==null){el.innerHTML='<div class="hint" style="margin:0">Tap a flat to see its details'+(edit?' and change it.':'.')+'</div>';return}
+ const st=stOf(APT.key,openNo),rec=PLOTS[APT.key+':'+openNo]||{},f=Math.floor(openNo/100),n=openNo%100;
+ let h=`<div style="font-size:18px"><b>Flat ${openNo}</b> - Floor ${f}, Flat ${n}<span class="chip bg-${st}">${ST[st].l}</span></div>
+ <div class="sz"><div>Type<b>${esc(rec.bhk||'2 BHK')}</b></div><div>Built-up area<b>${rec.area||APT.area} sq ft</b></div><div>Facing<b>${DIRN[rec.face||aptFace(openNo)]}</b></div>${rec.price?`<div>Price<b>${esc(rec.price)}</b></div>`:''}</div>`;
+ if(rec.at)h+=`<div class="hint" style="margin:4px 0 0">Last changed ${fmtAt(rec.at)}${rec.by?' by '+esc(rec.by):''}</div>`;
+ if(!edit){el.innerHTML=h;return}
+ const ps=pendSt||st;
+ h+=`<div class="sbtns">${SKEYS.map(s=>`<button data-b="${s}" style="background:${ST[s].c}" class="${ps===s?'cur':''}${swc(s)}">${ST[s].l}</button>`).join('')}</div>
+ <div class="fg"><div><label for="pcl">Buyer name</label><input id="pcl" type="text" maxlength="80" value="${esc(rec.client||'')}"></div><div><label for="pph">Buyer phone</label><input id="pph" type="tel" maxlength="20" value="${esc(rec.phone||'')}"></div>
+ <div><label for="par">Area (sq ft)</label><input id="par" type="number" min="1" max="5000" value="${rec.area||APT.area}"></div><div><label for="pbh">Type</label><input id="pbh" type="text" maxlength="10" value="${esc(rec.bhk||'2 BHK')}"></div>
+ <div><label for="pfc">Facing</label><select id="pfc">${Object.keys(DIRN).map(k=>`<option value="${k}"${(rec.face||aptFace(openNo))===k?' selected':''}>${DIRN[k]}</option>`).join('')}</select></div><div><label for="ppr">Price</label><input id="ppr" type="text" maxlength="20" value="${esc(rec.price||'')}"></div><div><label for="pnote">Note</label><input id="pnote" type="text" maxlength="120" value="${esc(rec.note||'')}"></div></div>
+ <div class="fe" id="pjerr">${esc(pjMsg)}</div><div class="row2"><button class="btn" id="pjsave">Save flat</button></div>`;
  el.innerHTML=h;
 }
 async function savePlots(list){
@@ -542,11 +600,17 @@ async function savePlots(list){
    (r.j.plots||[]).forEach(p=>PLOTS[p.id]=p);return true}
   catch(e){pjMsg='Could not save. Check your internet and try again.';return false}
  }
- list.forEach(p=>{PLOTS[p.proj+':'+p.no]={id:p.proj+':'+p.no,proj:p.proj,no:p.no,st:p.st,client:p.client||'',note:p.note||'',by:role,at:now}});return true;
+ list.forEach(p=>{PLOTS[p.proj+':'+p.no]=Object.assign({},p,{id:p.proj+':'+p.no,client:p.client||'',note:p.note||'',by:role,at:now})});return true;
 }
 $('mainnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMain(b.id==='np'?'proj':'team')});
-$('pj-tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curProj=b.dataset.p;openNo=null;pendSt=null;selSet=new Set();zoom=1;pjMsg='';renderProj();$('mapwrap').scrollTo&&$('mapwrap').scrollTo(0,0)});
+$('pj-tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curProj=b.dataset.p;openNo=null;pendSt=null;selSet=new Set();zoom=1;pjMsg='';stageProj=null;renderProj();$('mapwrap').scrollTo&&$('mapwrap').scrollTo(0,0)});
 $('pj-legend').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const s=b.dataset.s;hideSt.has(s)?hideSt.delete(s):hideSt.add(s);renderProj()});
+$('aptwrap').addEventListener('click',e=>{
+ const g=e.target.closest('[data-f],[data-a]');if(!g)return;const n=+(g.dataset.f||g.dataset.a);pjMsg='';aptFloor=Math.floor(n/100);
+ if(multi&&can('add')){selSet.has(n)?selSet.delete(n):selSet.add(n)}else{openNo=n;pendSt=null}
+ renderProj();
+});
+$('pbadge').onclick=()=>{showArea=!showArea;renderProj()};
 $('stage').addEventListener('click',e=>{
  const g=e.target.closest('g[data-n]');if(!g)return;const n=+g.dataset.n;pjMsg='';
  if(multi&&can('add')){selSet.has(n)?selSet.delete(n):selSet.add(n)}else{openNo=n;pendSt=null}
@@ -564,8 +628,9 @@ $('pj-panel').addEventListener('click',async e=>{
    const list=[...selSet].map(n=>({proj:curProj,no:n,st:pendSt,client:'',note}));
    if(await savePlots(list)){selSet=new Set();pendSt=null}
   }else{
-   const st=pendSt||stOf(curProj,openNo);
-   if(await savePlots([{proj:curProj,no:openNo,st,client,note}]))pendSt=null;
+   const st=pendSt||stOf(curProj,openNo),it={proj:curProj,no:openNo,st,client,note};
+   if(curProj===APT.key){it.phone=$('pph').value.trim();it.area=$('par').value;it.bhk=$('pbh').value.trim();it.price=$('ppr').value.trim();it.face=$('pfc').value}
+   if(await savePlots([it]))pendSt=null;
   }
   renderProj();
  }

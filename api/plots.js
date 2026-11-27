@@ -20,13 +20,13 @@ function cleanPlot(p, role) {
   const st = str(p.st, 20).toLowerCase();
   if (!VALID_ST.has(st)) throw bad('Invalid plot status.');
   const note = str(p.note, 120);
-  const client = str(p.client, 80);
+  const marketer = str(p.marketer != null ? p.marketer : p.client, 80);
   const rec = {
     id: `${proj}:${no}`,
     proj,
     no,
     st,
-    client,
+    marketer,
     note,
     by: role,
     at: new Date().toISOString(),
@@ -44,7 +44,7 @@ function cleanPlot(p, role) {
   return rec;
 }
 
-const stripViewer = ({ id, proj, no, st, at, area, bhk, price, face }) => ({ id, proj, no, st, at, area, bhk, price, face });
+const stripViewer = ({ id, proj, no, st, at, area, bhk, price, face, marketer, client }) => ({ id, proj, no, st, at, area, bhk, price, face, marketer: marketer || client || '' });
 
 module.exports = async (req, res) => {
   try {

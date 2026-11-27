@@ -50,3 +50,5 @@ If the yellow "Saving is not set up yet" bar still shows, the database is not co
 - Plot size (sq yd and sq ft) and dimensions come from the layout files in `public/layouts/data.js` (`a` = area, `d` = [short, long] side in feet, `x` = 1 means approximate).
 - Flats are numbered by floor: 101-106 (1st floor), 201-206 (2nd) ... 501-506 (5th). Facing is shown for every plot (from the road side, using each layout compass) and flat (editable).
 - Files changed in this update: `public/index.html`, `public/layouts/*`, `api/plots.js`.
+- Cars drive along the roads on every plot map (button "Cars: on/off"; off automatically if the device asks for reduced motion). Road paths are stored as `roads` in `public/layouts/data.js`.
+- "Client name" is now "Marketer name" (stored as `marketer`; older saved `client` values still show). Viewers can see the marketer name too.

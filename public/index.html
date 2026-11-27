@@ -682,11 +682,11 @@ $('go').onclick=async()=>{const un=$('u').value.trim().toLowerCase(),btn=$('go')
   if(!r.ok){$('err').textContent=r.status===401?'Wrong username or password.':'Login is not available right now. Try again.';btn.disabled=false;return}
   const j=await r.json();TOKEN=j.token;role=j.role;
   const pr=await fetch('/api/people',{headers:{Authorization:'Bearer '+TOKEN}});
-  if(!pr.ok)throw 0;
+  if(!pr.ok){$('err').textContent='Signed in, but the member list could not be loaded (error '+pr.status+'). Open /api/status on your site and check the database and password settings, then redeploy.';btn.disabled=false;return}
   Object.keys(BASE).forEach(k=>delete BASE[k]);(await pr.json()).forEach(p=>BASE[p.n]=p);
   PERSIST=pr.headers.get('x-persist')==='1';ACT={};PLOTS={};
   if(PERSIST){const ar=await fetch('/api/acts',{headers:{Authorization:'Bearer '+TOKEN}});if(ar.ok)(await ar.json()).forEach(a=>ACT[a.id]=a);const plr=await fetch('/api/plots',{headers:{Authorization:'Bearer '+TOKEN}});if(plr.ok)(await plr.json()).forEach(p=>PLOTS[p.id]=p)}
- }catch(e){$('err').textContent='Could not sign in. Check your connection and try again.';btn.disabled=false;return}
+ }catch(e){$('err').textContent='Could not finish signing in: '+(e&&e.message?e.message:'network problem')+'. Reload the page (Ctrl+F5) and try again.';btn.disabled=false;return}
  btn.disabled=false;$('pw').value='';
  $('login').classList.add('hide');$('app').classList.remove('hide');document.body.classList.add('in');window.scrollTo(0,0);
  $('rl').textContent=LABEL[role]+' access';openNo=null;pendSt=null;selSet=new Set();multi=false;setMain('team');teamF='ALL';view='list';$('q').value='';$('mp').value=new Date().toISOString().slice(0,7);render()};

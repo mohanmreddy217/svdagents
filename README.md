@@ -52,3 +52,5 @@ If the yellow "Saving is not set up yet" bar still shows, the database is not co
 - Files changed in this update: `public/index.html`, `public/layouts/*`, `api/plots.js`.
 - Cars drive along the roads on every plot map (button "Cars: on/off"; off automatically if the device asks for reduced motion). Road paths are stored as `roads` in `public/layouts/data.js`.
 - "Client name" is now "Marketer name" (stored as `marketer`; older saved `client` values still show). Viewers can see the marketer name too.
+- Internal team section (between Team and Projects): COUPONS BD TEAM, COUPONS SALES TEAM, COUPONS TELE TEAM and INTERNAL TEAM. The old SV DEVELOPERS team is merged into INTERNAL TEAM (BD TEAM, SALES TEAM and COUPANS TELE TEAM are renamed to the COUPONS names). Old names stored in the database are converted automatically when the page loads.
+- Files changed in this update: `public/index.html`, `lib/people.js`.
